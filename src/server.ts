@@ -1,20 +1,21 @@
-import express from 'express'
-import { connectDb } from './config/db'
-import env from './config/env'
-const app = express()
+import http from "http"
+import { Server } from "socket.io"
+import app from "./app"
+import { initSocket } from "./socket/socket"
+import { connectDB } from "./config/db"
 
-app.use(express.json())
+connectDB()
 
-connectDb()
+const server = http.createServer(app)
 
-app.get('/' , (req , res) => {
-   res.status(201).json({
-    message:'Welcome to Callrecorder Server'
-   })
+const io = new Server(server, {
+  cors: {
+    origin: "*"
+  }
 })
 
+initSocket(io)
 
-app.listen(env.PORT , () => {
-    console.log(`Server Running On Port ${env.PORT}`)
+server.listen(5000, () => {
+  console.log("Server running on port 5000")
 })
-
