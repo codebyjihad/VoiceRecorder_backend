@@ -1,6 +1,6 @@
 import { Server } from "socket.io"
-import User from "../models/User"
-import Call from "../models/Call"
+import User from "../models/user.call"
+import Call from "../models/call.model"
 
 export const initSocket = (io: Server) => {
 

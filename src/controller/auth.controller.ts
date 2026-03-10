@@ -1,52 +1,42 @@
 import { Request, Response } from "express"
-import  bcrypt from "bcrypt"
-import User from "../models/User"
-import { generateToken } from "../utils/jwt"
+import bcrypt from "bcrypt"
+import { User } from "../models/user.call"
+import { generateToken } from "../utils/generateToken"
 
 export const register = async (req: Request, res: Response) => {
-
   const { name, email, password } = req.body
 
-  const hash = await bcrypt.hash(password, 10)
+  const hashed = await bcrypt.hash(password, 10)
 
   const user = await User.create({
     name,
     email,
-    password: hash
+    password: hashed,
   })
 
-  const token = generateToken(user._id.toString())
-
   res.json({
-    token,
-    user
+    user,
+    token: generateToken(user._id.toString()),
   })
 }
 
 export const login = async (req: Request, res: Response) => {
-
   const { email, password } = req.body
 
   const user = await User.findOne({ email })
 
   if (!user) {
-    return res.status(404).json({
-      message: "User not found"
-    })
+    return res.status(400).json({ message: "User not found" })
   }
 
   const match = await bcrypt.compare(password, user.password)
 
   if (!match) {
-    return res.status(401).json({
-      message: "Wrong password"
-    })
+    return res.status(400).json({ message: "Invalid password" })
   }
 
-  const token = generateToken(user._id.toString())
-
   res.json({
-    token,
-    user
+    user,
+    token: generateToken(user._id.toString()),
   })
 }
