@@ -4,39 +4,64 @@ import { User } from "../models/user.call"
 import { generateToken } from "../utils/generateToken"
 
 export const register = async (req: Request, res: Response) => {
-  const { name, email, password } = req.body
+  try {
+    const { name, email, password } = req.body
 
-  const hashed = await bcrypt.hash(password, 10)
 
-  const user = await User.create({
-    name,
-    email,
-    password: hashed,
-  })
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "Name, email, and password are required" })
+    }
 
-  res.json({
-    user,
-    token: generateToken(user._id.toString()),
-  })
+    // Check if user already exists
+    const existingUser = await User.findOne({ email })
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" })
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+    })
+
+    // Send response with JWT
+    res.status(201).json({
+      user,
+      token: generateToken(user._id.toString()),
+    })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: "Server error" })
+  }
 }
 
 export const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body
+  try {
+    const { email, password } = req.body
 
-  const user = await User.findOne({ email })
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" })
+    }
 
-  if (!user) {
-    return res.status(400).json({ message: "User not found" })
+    const user = await User.findOne({ email })
+    if (!user) {
+      return res.status(400).json({ message: "User not found" })
+    }
+
+    const match = await bcrypt.compare(password, user.password)
+    if (!match) {
+      return res.status(400).json({ message: "Invalid password" })
+    }
+
+    res.json({
+      user,
+      token: generateToken(user._id.toString()),
+    })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: "Server error" })
   }
-
-  const match = await bcrypt.compare(password, user.password)
-
-  if (!match) {
-    return res.status(400).json({ message: "Invalid password" })
-  }
-
-  res.json({
-    user,
-    token: generateToken(user._id.toString()),
-  })
 }

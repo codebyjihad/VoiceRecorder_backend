@@ -1,21 +1,23 @@
-import http from "http"
-import { Server } from "socket.io"
-import app from "./app"
-import { initSocket } from "./socket/socket"
-import { connectDB } from "./config/db"
+import express from "express"
+import dotenv from "dotenv"
+import cors from "cors"
+import { connectDB} from "./config/db"
+
+import authRoutes from "./routes/auth.routes"
+import callRoutes from "./routes/call.routes"
+
+dotenv.config()
+
+const app = express()
+
+app.use(cors())
+app.use(express.json())
 
 connectDB()
 
-const server = http.createServer(app)
+app.use("/api/auth", authRoutes)
+app.use("/api/call", callRoutes)
 
-const io = new Server(server, {
-  cors: {
-    origin: "*"
-  }
-})
-
-initSocket(io)
-
-server.listen(5000, () => {
-  console.log("Server running on port 5000")
+app.listen(process.env.PORT, () => {
+  console.log("Server running")
 })
