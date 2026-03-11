@@ -15,6 +15,15 @@ app.use(express.json())
 
 connectDB()
 
+app.get('/', (req , res) => {
+    res.status(200).json({
+        message:"Welcome To VoiceRecording Server !"
+    })
+})
+
+
+
+
 app.use("/api/auth", authRoutes)
 app.use("/api/call", callRoutes)
 
