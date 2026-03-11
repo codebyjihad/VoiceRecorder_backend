@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import bcrypt from "bcrypt"
-import { User } from "../models/user.call"
+import { User } from "../models/user.model"
 import { generateToken } from "../utils/generateToken"
 
 export const register = async (req: Request, res: Response) => {
