@@ -39,7 +39,7 @@ export const endCall = async (req: Request, res: Response) => {
     call.recordingUrl = recordingUrl
 
     await call.save()
-
+   
     res.json(call)
   } catch (error) {
     res.status(500).json({ message: "Failed to end call" })
